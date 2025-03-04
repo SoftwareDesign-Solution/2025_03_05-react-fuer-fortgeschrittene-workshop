@@ -434,10 +434,11 @@ Die Produktverwaltung (`ProductsReducer`) soll mithilfe von Redux Toolkit umgese
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios, { AxiosError} from 'axios';
 import { Product } from '../entities/Product';
+import { RootState } from '@/store';
 
 const fetchProducts = createAsyncThunk(
     'product/fetchProducts',
-    async (_, { rejectWithValue }) => {
+    async (_, { getState, rejectWithValue }) => {
 
         const state = getState() as RootState;
         const { token } = state.auth;
@@ -801,14 +802,27 @@ export { QuantitySelector };
 ```typescript
 import { Link, useNavigate } from "react-router";
 import { Button } from "../button/Button";
-import { useSelector } from "react-redux";
-import { selectCartItemCount } from "@/features/cart";
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser, selectAuthenticated } from '@/features/auth';
+import { selectCartItemCount } from '@/features/cart';
+import { AppDispatch } from '@/store';
 
 const NavBar = () => {
 
     const navigate = useNavigate();
 
+    const dispatch: AppDispatch = useDispatch();
+
+    const authenticated = useSelector(selectAuthenticated);
     const itemcount = useSelector(selectCartItemCount);
+
+    const handleLogin = () => {
+
+        if (!authenticated)
+            return navigate('/login');
+        
+        dispatch(logoutUser());
+    }
 
     return (
         <nav className="flex justify-between p-4 border-b-2 border-gray-300">
@@ -911,11 +925,38 @@ CookieUtils.set('auth-store', {}, cookieOptions);
 **/src/store/index.ts**
 
 ```typescript
+import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
+import { authReducer } from '@/features/auth';
+import { cartReducer } from '@/features/cart';
+import { productsReducer } from '@/features/products';
+import { CookieUtils } from "@/utils/CookieUtils";
+
+const loadState = (sliceName: string) => {
+    try {
+      const serializedState = localStorage.getItem(sliceName);
+      return serializedState ? JSON.parse(serializedState) : undefined;
+    } catch (err) {
+      console.error(`Fehler beim Laden des Zustands für ${sliceName}`, err);
+      return undefined;
+    }
+};
+
+const loadCookie = (sliceName: string) => {
+    try {
+        
+      const serializedState = CookieUtils.get(sliceName);
+      return serializedState ? JSON.parse(serializedState) : undefined;
+    } catch (err) {
+      console.error(`Fehler beim Laden des Zustands für ${sliceName}`, err);
+      return undefined;
+    }
+};
+
 const store = configureStore({
     reducer: {
         auth: authReducer,
         cart: cartReducer,
-        products: productsReducer,
+        products: productsReducer
     },
     preloadedState: {
         auth: loadCookie('auth-store'),
@@ -942,6 +983,17 @@ store.subscribe(() => {
 
 });
 
+// Wird für TypeScript benötigt
+export type AppDispatch = typeof store.dispatch;
+export type RootState = ReturnType<typeof store.getState>;
+export type AppThunk<ReturnType = void> = ThunkAction<
+    ReturnType,
+    RootState,
+    unknown,
+    Action<string>
+>
+
+export { store };
 ```
 
 </p>
