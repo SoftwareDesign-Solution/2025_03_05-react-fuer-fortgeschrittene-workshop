@@ -1,30 +1,28 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Link, Outlet, useSearchParams } from 'react-router';
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
 import { Product } from "../../entities/Product";
 import { StyledBadge } from "@/components/styledbadge/StyledBadge";
 import { QuantitySelector } from "@/features/cart";
+import { AppDispatch } from "@/store";
+import { fetchProducts } from "../../store/productsActions";
+import { selectError, selectLoading, selectProducts } from "../../store/productsSlice";
 
 const ProductsPage = () => {
 
-    const error = '';
-    const loading = false;
-    const [products, setProducts] = useState<Product[]>([]);
+    const dispatch: AppDispatch = useDispatch();
+
+    const error = useSelector(selectError);
+    const loading = useSelector(selectLoading);
+    const products = useSelector(selectProducts);
     
     const [searchParams, setSearchParams] = useSearchParams();
 
     const selectedType = searchParams.get('type');
 
     useEffect(() => {
-
-        const fetchProducts = async () => {
-            const response = await axios.get<Product[]>("http://localhost:3001/products");
-            setProducts(response.data);
-        };
-    
-        fetchProducts();
-
-    }, [])
+        dispatch(fetchProducts());
+    }, [dispatch]);
 
     const filteredProducts = useMemo(() => {
         return selectedType ? products.filter((p: Product) => p.type === selectedType) : products;

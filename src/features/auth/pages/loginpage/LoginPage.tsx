@@ -1,8 +1,10 @@
-import axios from "axios";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/button/Button";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store";
+import { loginUser } from "../../store/authActions";
 
 const loginFormSchema = z.object({
     email: z.string().email('E-Mail ist erforderlich'),
@@ -12,6 +14,8 @@ const loginFormSchema = z.object({
 type FormData = z.infer<typeof loginFormSchema>;
 
 const LoginPage = () => {
+
+    const dispatch: AppDispatch = useDispatch();
 
     const {
         register,
@@ -24,13 +28,10 @@ const LoginPage = () => {
     
     const onSubmit = async (data: FormData) => {
     
-        // Aufgabe: Übermitteln Sie die Daten an den JSON-Server http://localhost:3001/login
-        const response = await axios.post("http://localhost:3001/login", data);
-        console.log(response.data);
-    
-        const { accessToken } = response.data;
-        localStorage.setItem("accessToken", accessToken);
-        
+        console.log(data);
+
+        await dispatch(loginUser(data));
+
         reset();
 
     };

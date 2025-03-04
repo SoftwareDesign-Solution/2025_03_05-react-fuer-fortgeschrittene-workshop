@@ -1,14 +1,25 @@
 import { Link, useNavigate } from "react-router";
 import { Button } from "../button/Button";
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser, selectAuthenticated } from '@/features/auth';
+import { selectCartItemCount } from '@/features/cart';
+import { AppDispatch } from '@/store';
 
 const NavBar = () => {
 
     const navigate = useNavigate();
 
-    const itemcount = 0;
+    const dispatch: AppDispatch = useDispatch();
+
+    const authenticated = useSelector(selectAuthenticated);
+    const itemcount = useSelector(selectCartItemCount);
 
     const handleLogin = () => {
-        navigate('/login');
+
+        if (!authenticated)
+            return navigate('/login');
+        
+        dispatch(logoutUser());
     }
   
     return (
@@ -57,7 +68,7 @@ const NavBar = () => {
 
                 {/* Aufgabe: Login-Button soll "http://localhost:3000/login" aufrufen. Verwenden Sie hierzu den useNavigate-Hook */}
                 <Button id="nav-login" onClick={handleLogin}>
-                    'Log in'
+                    {authenticated ? 'Log out' : 'Log in'}
                 </Button>
 
             </div>
