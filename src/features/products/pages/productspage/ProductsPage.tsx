@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link, Outlet, useSearchParams } from 'react-router';
 import axios from "axios";
 import { Product } from "../../entities/Product";
 import { StyledBadge } from "@/components/styledbadge/StyledBadge";
@@ -10,7 +11,9 @@ const ProductsPage = () => {
     const loading = false;
     const [products, setProducts] = useState<Product[]>([]);
     
-    const selectedType = ''
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const selectedType = searchParams.get('type');
 
     useEffect(() => {
 
@@ -28,7 +31,7 @@ const ProductsPage = () => {
       }, [products, selectedType]);
 
     const handleTypeClick = (type?: string) => {
-        console.log(type);
+        setSearchParams(type ? { type } : {}); // Leere Parameter setzen, um den Filter zu entfernen
     };
 
     return (
@@ -73,9 +76,9 @@ const ProductsPage = () => {
                                         {(filteredProducts.length > 0) && filteredProducts.map((product: Product) => (
                                         <tr key={product.id}>
                                             <td className="product-name whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
-                                                <span>
+                                                <Link to={`${product.id}`}>
                                                     {product.name}
-                                                </span>
+                                                </Link>
                                             </td>
                                             <td className="product-price whitespace-nowrap px-3 py-4 text-sm text-gray-500">{product.price} EUR</td>
                                             <td className="cart-quantity relative whitespace-nowrap py-4 pl-3 pr-4 min-w-[140px] text-right text-sm font-medium sm:pr-0">
@@ -91,7 +94,7 @@ const ProductsPage = () => {
                 </div>
 
                 <div>
-                    {/* Place for the outlet */}
+                    <Outlet />
                 </div>
 
             </div>

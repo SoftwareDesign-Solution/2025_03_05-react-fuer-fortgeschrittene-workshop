@@ -1,10 +1,25 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useParams } from "react-router";
 import { Product } from "../../entities/Product";
 
 const ProductDetailsPage = () => {
 
-    const productId = 0;
-    const product: Product | undefined = { id: 1, name: 'Artikel', description: 'Beschreibung', price: 1.0, type: 'Artikel' };
+    const [product, setProduct] = useState<Product | null>(null);
+
+    const { productId } = useParams();
     
+    useEffect(() => {
+
+        const fetchProduct = async () => {
+            const response = await axios.get<Product>(`http://localhost:3001/products/${productId}`);
+            setProduct(response.data);
+        }
+
+        fetchProduct();
+
+    }, [productId])
+
     return (
         <>
             <h1 id="product-title" className="text-2xl">Produkt: {product?.id}</h1>
