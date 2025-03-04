@@ -1,14 +1,32 @@
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/button/Button";
 
-type FormData = {
-    email: string;
-    password: string
-};
+const loginFormSchema = z.object({
+    email: z.string().email('E-Mail ist erforderlich'),
+    password: z.string().min(8, 'Passwort ist erforderlich')
+});
+
+type FormData = z.infer<typeof loginFormSchema>;
 
 const LoginPage = () => {
 
+    const {
+        register,
+        reset,
+        handleSubmit,
+        formState: { errors }
+    } = useForm<FormData>({
+        resolver: zodResolver(loginFormSchema)
+    });
+    
     const onSubmit = async (data: FormData) => {
-        // Aufgabe: Übermitteln Sie die Daten an den JSON-Server http://localhost:3001/login
+        
+        console.log(data);
+
+        reset();
+        
     };
 
     return (
@@ -21,7 +39,7 @@ const LoginPage = () => {
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
 
-                    <form className="space-y-6">
+                    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                         
                         {/* E-Mail */}
                         <div>
@@ -32,9 +50,11 @@ const LoginPage = () => {
                                     id="email" 
                                     placeholder="you@example.com"
                                     className="block w-full rounded-md bg-white px-4 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                    {...register('email')}
                                 />
                             </div>
-                            <div className="mt-2 text-red-600">E-Mail ist erforderlich</div>
+                            {/*<div className="mt-2 text-red-600">E-Mail ist erforderlich</div>*/}
+                            <div className="mt-2 text-red-600">{errors.email?.message}</div>
                         </div>
                         
                         {/* Password */}
@@ -45,9 +65,11 @@ const LoginPage = () => {
                                     type="password" 
                                     id="password"
                                     className="block w-full rounded-md bg-white px-4 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                    {...register('password')}
                                 />
                             </div>
-                            <div className="mt-2 text-red-600">Passwort ist erforderlich</div>
+                            {/*<div className="mt-2 text-red-600">Passwort ist erforderlich</div>*/}
+                            <div className="mt-2 text-red-600">{errors.password?.message}</div>
                         </div>
 
                         {/* Submit */}
