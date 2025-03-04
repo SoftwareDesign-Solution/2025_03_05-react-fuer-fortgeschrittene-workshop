@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import { Product } from "../../entities/Product";
 import { StyledBadge } from "@/components/styledbadge/StyledBadge";
 import { QuantitySelector } from "@/features/cart";
@@ -14,11 +15,10 @@ const ProductsPage = () => {
     useEffect(() => {
 
         const fetchProducts = async () => {
-            setProducts([
-                { id: 1, name: 'Artikel', description: 'Beschreibung', price: 1.0, type: 'Artikel' }
-            ]);
+            const response = await axios.get<Product[]>("http://localhost:3001/products");
+            setProducts(response.data);
         };
-
+    
         fetchProducts();
 
     }, [])

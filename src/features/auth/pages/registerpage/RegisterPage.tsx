@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useForm } from "react-hook-form";
 import z from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,11 +25,16 @@ const RegisterPage = () => {
     });
 
     const onSubmit = async (data: FormData) => {
-        
-        console.log(data);
-
+    
+        // Aufgabe: Übermitteln Sie die Daten an den JSON-Server http://localhost:3001/login
+        const response = await axios.post("http://localhost:3001/register", data);
+        console.log(response.data);
+    
+        const { accessToken } = response.data;
+        localStorage.setItem("accessToken", accessToken);
+    
         reset();
-
+    
     };
 
     return (
